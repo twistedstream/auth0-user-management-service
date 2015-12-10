@@ -17,16 +17,18 @@ Before you can use the service, you need to provision an instance of it that wor
 Then to provision your service, use the following command:
 
 ```bash
-wt create --name user_management \
-  --secret api_access_token="API_ACCESS_TOKEN" \
-  --secret client_secret="CLIENT_SECRET" \
-  --secret domain="DOMAIN" \
-  --secret authz_func="AUTHZ_FUNC" \
-  --secret cors_allowed_domains="CORS_ALLOWED_DOMAINS" \
+wt create -n user_management \
+  -p "WEBTASK_PROFILE" \
+  -s api_access_token="API_ACCESS_TOKEN" \
+  -s client_secret="CLIENT_SECRET" \
+  -s domain="DOMAIN" \
+  -s authz_func="AUTHZ_FUNC" \
+  -s cors_allowed_domains="CORS_ALLOWED_DOMAINS" \
   https://github.com/twistedstream/auth0-user-management-service/blob/master/webtask.js
 ```
 
 where:
+* `WEBTASK_PROFILE`: the name of the profile you set up when setting up your Webtask account
 * `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to your Account users by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
 * `CLIENT_SECRET`: the Client Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
 * `DOMAIN`: your Auth0 account domain
@@ -56,7 +58,7 @@ For example, to provision a new user using your instance of the service, your Cl
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer ADMIN_USER_JWT' \
-  -d '{"connection":"your-connection", "email":"foo@bar.com", "password":"secret"}'
+  -d '{"connection":"your-connection", "email":"foo@bar.com", "password":"secret"}' \
   https://sandbox.it.auth0.com/api/run/your-account/user_management
 ```
 
