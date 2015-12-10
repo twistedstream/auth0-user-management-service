@@ -4,14 +4,15 @@ A service that allows "admin" users within an Auth0 account to manage other user
 
 ## Key features
 
+* Authenticate an admin user with a configured client secret
 * Authorize an admin user by configuring the service with a function that evaluates the claims within an inbound Bearer token (JWT)
-* Gain the necessary access to the [Auth0 Management API](https://auth0.com/docs/api/v2) by configuring the service with an API access token and a domain
-* Endpoints exposed by the service simply proxy calls to associated Users resource endpoints in the Management API for maximum flexiblity and future-proofing
+* Gain the necessary access to the [Auth0 Management API](https://auth0.com/docs/api/v2) by configuring the service with an API access token and an Auth0 account domain (tenant)
+* Endpoints exposed by the service simply proxy calls to associated Users resource endpoints in the Management API for maximum flexibility and future-proofing
 * The service is implemented as a [webtask](https://webtask.io) so instances can easily be provisioned and deployed as a user-managament backend for any Auth0 account
 
 ## Provision
 
-Before you can use the service, you need to provision an instance of it that works with your Auth0 account. The easiest way to get started with Webtasks, is to set up the free container just for your account by following the steps [here](https://manage.auth0.com/#/account/webtasks).
+Before you can use the service, you need to provision an instance of it that works with your Auth0 account. Provisioning is done by creating a Webtask that uses the source code in this GitHub repo. If you don't already have a Webtask account, you can easily set one up using your Auth0 account by following the steps [here](https://manage.auth0.com/#/account/webtasks).
 
 Then to provision your service, use the following command:
 
@@ -22,7 +23,7 @@ wt create --name user_management \
   --secret domain="DOMAIN" \
   --secret authz_func="AUTHZ_FUNC" \
   --secret cors_allowed_domains="CORS_ALLOWED_DOMAINS" \
-  https://github.com/twistedstream/auth0-user-management-service/webtask.js
+  https://github.com/twistedstream/auth0-user-management-service/blob/master/webtask.js
 ```
 
 where:
@@ -32,15 +33,34 @@ where:
 * `AUTHZ_FUNC`: a JavaScript function, that, given a JWT payload, will return `true` if the identity matches your criteria for a user authorized to manage your users. Example: `function (payload) { return payload.admin === true; }`
 * `CORS_ALLOWED_DOMAINS`: a list of domains that your service will permit via CORS
 
-The output of the command will be a URL that looks something like this:
+If successful, the output of the command will be a URL that looks something like this:
 
 ```
-https://sandbox.it.auth0.com/api/run/YOUR_ACCOUNT/user_management
+https://sandbox.it.auth0.com/api/run/your-account/user_management
 ```
 
 ## Usage
 
-(more)
+Once up and running, your service instance will expose a set of endpoints that will allow the authorized admin user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_func`, which examines the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint using the configured `api_access_token`.
+
+The following endpoints are currently supported and include links to their proxied Auth0 Management API endpoints for documentation reference:
+
+* **GET** `/users`: [List or search users](https://auth0.com/docs/api/v2#!/Users/get_users)
+* **POST** `/users`: [Create (provision) a user](https://auth0.com/docs/api/v2#!/Users/post_users)
+* **GET** `/users/{id}`: [Get a user](https://auth0.com/docs/api/v2#!/Users/get_users_by_id)
+* **DELETE** `/users/{id}`: [Delete a user](https://auth0.com/docs/api/v2#!/Users/delete_users_by_id)
+* **PATCH** `/users/{id}`: [Update a user](https://auth0.com/docs/api/v2#!/Users/patch_users_by_id)
+
+For example, to provision a new user using your instance of the service, your Client application would make the equivalent of the following cURL call (e.g. via jQuery):
+
+```bash
+curl -X POST -H 'Content-Type: application/json' \
+  -H 'Authorization: Bearer ADMIN_USER_JWT' \
+  -d '{"connection":"your-connection", "email":"foo@bar.com", "password":"secret"}'
+  https://sandbox.it.auth0.com/api/run/your-account/user_management
+```
+
+where `ADMIN_USER_JWT` is `id_token` obtained when the admin user logged into the Client application.
 
 ## What is Auth0?
 
