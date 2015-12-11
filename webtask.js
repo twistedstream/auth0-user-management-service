@@ -1,6 +1,7 @@
 var jwt = require('express-jwt');
 var Express = require('express');
 var Webtask = require('webtask-tools');
+var _ = require('lodash');
 
 var app = Express();
 
@@ -35,6 +36,22 @@ app.use(jwt({
     done(null, new Buffer(req.auth0.client_secret, 'base64'));
   }
 }));
+
+// authorize
+app.use(function authorize (req, res, done) {
+  var issuer = 'https://' + req.auth0.domain + '/';
+
+  if (req.user.iss !== issuer)
+    return res.status(401).send('Untrusted issuer');
+  if (req.user.aud !== req.auth0.client_id)
+    return res.status(401).send('Incorrect audience');
+
+  var authorizer = _.matches(JSON.parse(req.auth0.authz_claims));
+  if (!authorizer(req.user))
+    return res.status(401).send('User unauthorized');
+
+  done();
+});
 
 // endpoints
 
