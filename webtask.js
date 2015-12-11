@@ -4,6 +4,31 @@ var Webtask = require('webtask-tools');
 
 var app = Express();
 
+app.use(function getAuth0Config (req, res, done) {
+  //TODO: switch to req.webtaskContext.secrets when available
+  var secrets = req.webtaskContext.data;
+
+  // load auth0 config object with secret values
+  req.auth0 = {
+    client_id: secrets.client_id,
+    client_secret: secrets.client_secret,
+    domain: secrets.domain,
+    authz_claims: secrets.authz_claims
+  };
+
+  // assert that all values were populated
+  var missingKeys = Object.keys(req.auth0).reduce(function (previous, key) {
+    var secret = req.auth0[key];
+    if (secret === undefined)
+      previous.push(key);
+    return previous;
+  }, []);
+  if (missingKeys.length > 0)
+    return done(new Error('Missing secrets: ' + missingKeys));
+
+  done();
+});
+
 // endpoints
 
 app.get('/users', function (req, res) {
