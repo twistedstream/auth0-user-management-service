@@ -14,7 +14,7 @@ A service that allows "admin" users within an Auth0 account to manage other user
 
 Before you can use the service, you need to provision an instance of it that works with your Auth0 account. Provisioning is done by creating a Webtask that uses the source code in this GitHub repo. If you don't already have a Webtask account, you can easily set one up using your Auth0 account by following the steps [here](https://manage.auth0.com/#/account/webtasks).
 
-Then to provision your service, use the following command:
+Then to provision your service, use the following [Webtask CLI](https://webtask.io/cli) command:
 
 ```bash
 wt create -n user_management \
@@ -24,8 +24,8 @@ wt create -n user_management \
   -s client_secret="CLIENT_SECRET" \
   -s domain="DOMAIN" \
   -s authz_claims="AUTHZ_CLAIMS" \
-  -s api_access_token="$API_ACCESS_TOKEN" \
-  -s cors_allowed_domains="$CORS_ALLOWED_DOMAINS" \
+  -s api_access_token="API_ACCESS_TOKEN" \
+  -s cors_allowed_domains="CORS_ALLOWED_DOMAINS" \
   https://raw.githubusercontent.com/twistedstream/auth0-user-management-service/master/webtask.js
 ```
 
@@ -47,7 +47,7 @@ https://sandbox.it.auth0.com/api/run/your-account/user_management
 
 ## Usage
 
-Once up and running, your service instance will expose a set of endpoints that will allow the authorized admin user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_func`, which examines the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint using the configured `api_access_token`.
+Once up and running, your service instance will expose a set of endpoints that will allow an authorized user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_claims` value, which is compared against the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint using the configured `api_access_token`.
 
 The following endpoints are currently supported and include links to their proxied Auth0 Management API endpoints for documentation reference:
 
@@ -66,7 +66,7 @@ curl -X POST -H 'Content-Type: application/json' \
   https://sandbox.it.auth0.com/api/run/your-account/user_management
 ```
 
-where `ADMIN_USER_JWT` is `id_token` obtained when the admin user logged into the Client application.
+where `ADMIN_USER_JWT` is the `id_token` obtained when the admin user logged into the Client application.
 
 ## What is Auth0?
 
