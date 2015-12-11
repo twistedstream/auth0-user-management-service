@@ -29,6 +29,13 @@ app.use(function getAuth0Config (req, res, done) {
   done();
 });
 
+// authenticate
+app.use(jwt({
+  secret: function(req, payload, done) {
+    done(null, new Buffer(req.auth0.client_secret, 'base64'));
+  }
+}));
+
 // endpoints
 
 app.get('/users', function (req, res) {
