@@ -18,21 +18,23 @@ Then to provision your service, use the following command:
 
 ```bash
 wt create -n user_management \
+  --no-parse --no-merge \
   -p "WEBTASK_PROFILE" \
-  -s api_access_token="API_ACCESS_TOKEN" \
+  -s client_id="CLIENT_ID" \
   -s client_secret="CLIENT_SECRET" \
   -s domain="DOMAIN" \
-  -s authz_func="AUTHZ_FUNC" \
-  -s cors_allowed_domains="CORS_ALLOWED_DOMAINS" \
-  https://github.com/twistedstream/auth0-user-management-service/blob/master/webtask.js
+  -s authz_claims="AUTHZ_CLAIMS" \
+  -s api_access_token="$API_ACCESS_TOKEN" \
+  -s cors_allowed_domains="$CORS_ALLOWED_DOMAINS" \
+  https://raw.githubusercontent.com/twistedstream/auth0-user-management-service/master/webtask.js
 ```
 
 where:
 * `WEBTASK_PROFILE`: the name of the profile you set up when setting up your Webtask account
-* `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to your Account users by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
-* `CLIENT_SECRET`: the Client Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
+* `CLIENT_ID`/`CLIENT_SECRET`: The Client ID and Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
 * `DOMAIN`: your Auth0 account domain
-* `AUTHZ_FUNC`: a JavaScript function, that, given a JWT payload, will return `true` if the identity matches your criteria for a user authorized to manage your users. Example: `function (payload) { return payload.admin === true; }`
+* `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to your Account users by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
+* `AUTHZ_CLAIMS`: a JSON object that represents the claim state that must exist within the identity's JWT payload for it to be considered authorized to make the request. Example: `{"admin": true}`
 * `CORS_ALLOWED_DOMAINS`: a list of domains that your service will permit via CORS
 
 If successful, the output of the command will be a URL that looks something like this:
@@ -40,6 +42,8 @@ If successful, the output of the command will be a URL that looks something like
 ```
 https://sandbox.it.auth0.com/api/run/your-account/user_management
 ```
+
+> Your URL may contain a `?webtask_no_cache=1` at the end, which you can ignore when using the webtask in the next section.
 
 ## Usage
 
