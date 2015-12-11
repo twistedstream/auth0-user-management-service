@@ -59,4 +59,18 @@ app.get('/users', function (req, res) {
   res.status(200).json({ foo: 'bar' });
 });
 
+// errors
+
+app.use(function errorHandler (err, req, res, next) {
+  if (err.message && err.status && err.status < 500) {
+    // client errors
+    res.status(err.status).send(err.message);
+  } else {
+    // server errors
+    console.log(err.stack ? err.stack : err);
+
+    res.status(500).send('Something borked!');
+  }
+});
+
 module.exports = Webtask.fromExpress(app);
