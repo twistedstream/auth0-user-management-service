@@ -5,9 +5,9 @@ A service that allows "admin" users within an Auth0 account to manage other user
 ## Key features
 
 * Authenticate an admin user with a configured client secret
-* Authorize an admin user by configuring the service with a function that evaluates the claims within an inbound Bearer token (JWT)
+* Authorize an admin user by configuring the service with required claims that need to exist in an inbound Bearer token (JWT)
 * Gain the necessary access to the [Auth0 Management API](https://auth0.com/docs/api/v2) by configuring the service with an API access token and an Auth0 account domain (tenant)
-* Endpoints exposed by the service simply proxy calls to associated Users resource endpoints in the Management API for maximum flexibility and future-proofing
+* Endpoints exposed by the service simply reverse-proxy calls to associated Users resource endpoints in the Management API for maximum flexibility and future-proofing
 * The service is implemented as a [webtask](https://webtask.io) so instances can easily be provisioned and deployed as a user-managament backend for any Auth0 account
 
 ## Provision
@@ -33,7 +33,7 @@ where:
 * `WEBTASK_PROFILE`: the name of the profile you set up when setting up your Webtask account
 * `CLIENT_ID`/`CLIENT_SECRET`: The Client ID and Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
 * `DOMAIN`: your Auth0 account domain
-* `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to your Account users by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
+* `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to manage your Account users. Obtain one by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating a token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
 * `AUTHZ_CLAIMS`: a JSON object that represents the claim state that must exist within the identity's JWT payload for it to be considered authorized to make the request. Example: `{"admin": true}`
 * `CORS_ALLOWED_DOMAINS`: a list of domains that your service will permit via CORS
 
@@ -62,8 +62,9 @@ For example, to provision a new user using your instance of the service, your Cl
 ```bash
 curl -X POST -H 'Content-Type: application/json' \
   -H 'Authorization: Bearer ADMIN_USER_JWT' \
+  -H 'Content-Type: application/json' \
   -d '{"connection":"your-connection", "email":"foo@bar.com", "password":"secret"}' \
-  https://sandbox.it.auth0.com/api/run/your-account/user_management
+  https://sandbox.it.auth0.com/api/run/your-account/user_management/users
 ```
 
 where `ADMIN_USER_JWT` is the `id_token` obtained when the admin user logged into the Client application.

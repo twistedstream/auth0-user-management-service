@@ -2,8 +2,12 @@ var jwt = require('express-jwt');
 var Express = require('express');
 var Webtask = require('webtask-tools');
 var _ = require('lodash');
+var request = require('request');
+var bodyParser = require('body-parser');
 
 var app = Express();
+
+app.use(bodyParser.json());
 
 app.use(function getAuth0Config (req, res, done) {
   //TODO: switch to req.webtaskContext.secrets when available
@@ -14,7 +18,8 @@ app.use(function getAuth0Config (req, res, done) {
     client_id: secrets.client_id,
     client_secret: secrets.client_secret,
     domain: secrets.domain,
-    authz_claims: secrets.authz_claims
+    authz_claims: secrets.authz_claims,
+    api_access_token: secrets.api_access_token
   };
 
   // assert that all values were populated
@@ -55,9 +60,40 @@ app.use(function authorize (req, res, done) {
 
 // endpoints
 
-app.get('/users', function (req, res) {
-  res.status(200).json({ foo: 'bar' });
-});
+function apiReverseProxy (req, res, next) {
+  var opts = {
+    method: req.method,
+    uri: 'https://' + req.auth0.domain + '/api/v2' + req.path,
+    qs: _.omit(req.query, 'webtask_no_cache'),
+    auth: { bearer: req.auth0.api_access_token },
+    json: Object.keys(req.body).length > 0 ? req.body : null
+  };
+
+  request(opts)
+    .on('request', function (request) {
+      var loggedRequest = {
+        method: request.method,
+        path: request.path,
+        headers: _.clone(request._headers)
+      };
+      loggedRequest.headers.authorization = 'Bearer XXX';
+
+      console.log('Auth0 API Call:', {
+        by_user: req.user.sub,
+        request: loggedRequest
+      });
+    })
+    .on('error', function (err) {
+      console.log(err);
+    })
+    .pipe(res);
+}
+
+app.get('/users', apiReverseProxy);
+app.post('/users', apiReverseProxy);
+app.get('/users/:id', apiReverseProxy);
+app.del('/users/:id', apiReverseProxy);
+app.patch('/users/:id', apiReverseProxy);
 
 // errors
 
