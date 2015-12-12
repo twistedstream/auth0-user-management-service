@@ -24,8 +24,7 @@ wt create -n user_management \
   -s client_secret="CLIENT_SECRET" \
   -s domain="DOMAIN" \
   -s authz_claims="AUTHZ_CLAIMS" \
-  -s api_access_token="API_ACCESS_TOKEN" \
-  -s cors_allowed_domains="CORS_ALLOWED_DOMAINS" \
+  -s api_access_token="API_ACCESS_TOKEN"
   https://raw.githubusercontent.com/twistedstream/auth0-user-management-service/master/webtask.js
 ```
 
@@ -35,7 +34,8 @@ where:
 * `DOMAIN`: your Auth0 account domain
 * `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to manage your Account users. Obtain one by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating a token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
 * `AUTHZ_CLAIMS`: a JSON object that represents the claim state that must exist within the identity's JWT payload for it to be considered authorized to make the request. Example: `{"admin": true}`
-* `CORS_ALLOWED_DOMAINS`: a list of domains that your service will permit via CORS
+
+> NOTE: We don't need to worry about configuring the service with CORS as the Webtask infrastructure automatically responds with CORS headers that allow all origins. This is secure because we don't allow access to the service without a valid JWT Bearer token.
 
 If successful, the output of the command will be a URL that looks something like this:
 
