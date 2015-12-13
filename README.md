@@ -4,11 +4,15 @@ A service that allows "admin" users within an Auth0 account to manage other user
 
 ## Key features
 
-* Authenticate an admin user with a configured client secret
-* Authorize an admin user by configuring the service with required claims that need to exist in an inbound Bearer token (JWT)
-* Gain the necessary access to the [Auth0 Management API](https://auth0.com/docs/api/v2) by configuring the service with an API access token and an Auth0 account domain (tenant)
-* Endpoints exposed by the service simply reverse-proxy calls to associated Users resource endpoints in the Management API for maximum flexibility and future-proofing
-* The service is implemented as a [webtask](https://webtask.io) so instances can easily be provisioned and deployed as a user-managament backend for any Auth0 account
+* Quickly set up a REST API that can be used by a frontend app in your Auth0 account to manage your users without having to build your own from scratch
+* Provisioning and deployment of your own instance of the service is a snap since its a [Webtask](https://webtask.io)
+* Authenticate and authorize "admin" users with a JWT that contains the claims you specify
+* Endpoints exposed by the service simply reverse-proxy calls to associated Users resource endpoints in the [Auth0 Management API](https://auth0.com/docs/api/v2) for maximum flexibility and future-proofing
+* Your service instances gains the necessary access to the Auth0 Management API with an API access token that you configure
+
+## Demo
+
+To see this service in action, check out this [sample frontend Angular app](https://twistedstream.github.io/auth0-user-management-service), which calls a demo instance of the Webtask service. You can view the source to that frontend app [here](https://github.com/twistedstream/auth0-user-management-service/tree/gh-pages).
 
 ## Provision
 
@@ -47,8 +51,6 @@ https://sandbox.it.auth0.com/api/run/your-account/user_management
 
 ## Usage
 
-Once up and running, your service instance will expose a set of endpoints that will allow an authorized user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_claims` value, which is compared against the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint using the configured `api_access_token`.
-
 The following endpoints are currently supported and include links to their proxied Auth0 Management API endpoints for documentation reference:
 
 * **GET** `/users`: [List or search users](https://auth0.com/docs/api/v2#!/Users/get_users)
@@ -68,6 +70,10 @@ curl -X POST -H 'Content-Type: application/json' \
 ```
 
 where `ADMIN_USER_JWT` is the `id_token` obtained when the admin user logged into the Client application.
+
+## How it works
+
+Once up and running, your service instance will expose a set of endpoints that will allow an authorized user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_claims` value, which is compared against the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint using the configured `api_access_token`.
 
 ## What is Auth0?
 
