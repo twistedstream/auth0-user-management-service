@@ -18,7 +18,7 @@ However, there are a few scenarios where having your own backend is handy. A com
 
 ## Demo
 
-To see this service in action, check out this [sample frontend Angular app](https://twistedstream.github.io/auth0-user-management-service), which calls a demo instance of the Webtask service. You can view the source to that frontend app [here](https://github.com/twistedstream/auth0-user-management-service/tree/gh-pages).
+To see this service in action, check out this [sample frontend Angular app](http://twistedstream.github.io/auth0-user-management-service), which calls a demo instance of the Webtask service. You can view the source to that frontend app [here](https://github.com/twistedstream/auth0-user-management-service/tree/gh-pages).
 
 ## Provision
 
