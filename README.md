@@ -2,12 +2,18 @@
 
 A service that allows "admin" users within an Auth0 account to manage other users.
 
+## Overview
+
+Many Auth0 customers have built apps that don't have their own hosted backend. Instead they use Auth0 itself as well as a collection of other services to preform backend operations. At Auth0 we like to call this a "backendless" app.
+
+However, there are a few scenarios where having your own backend is handy. A common one is when you want to manage the users in your Auth0 account with your own app (i.e. an admin app) instead of using the Auth0 Dashboard. To do this your app needs to use the [Auth0 Management API](https://auth0.com/docs/api/v2). Unfortunately you can't safely call this API from most frontend applications because it requires you to embed secrets (i.e. an Auth0 API access token) in your app, and secrets can usually only be safely stored on the server side (i.e. in a backend). This project provides you with an easy and secure solution to this problem.
+
 ## Key features
 
 * Quickly set up a REST API that can be used by a frontend app in your Auth0 account to manage your users without having to build your own from scratch
-* Provisioning and deployment of your own instance of the service is a snap since its a [Webtask](https://webtask.io)
+* Provision and deploy your own instance of this service is a snap since its a [Webtask](https://webtask.io)
 * Authenticate and authorize "admin" users with a JWT that contains the claims you specify
-* Endpoints exposed by the service simply reverse-proxy calls to associated Users resource endpoints in the [Auth0 Management API](https://auth0.com/docs/api/v2) for maximum flexibility and future-proofing
+* Endpoints exposed by the service simply reverse-proxy calls to associated Users resource endpoints in the Auth0 Management API for maximum flexibility and future-proofing
 * Your service instances gains the necessary access to the Auth0 Management API with an API access token that you configure
 
 ## Demo
