@@ -1,0 +1,12 @@
+<div class="update">
+  <h2>{{user.email}}</h2>
+
+  <button class="btn-md btn-primary" ng-click="go('/')">Home</button>
+
+  <h3>Raw User Profile:</h3>
+  <pre id="raw-user" pretty-json="user"></pre>
+
+  <h3>User Profile to Patch:</h3>
+  <pre id="patch-user" pretty-json="userPatch" edition="true" on-edit="doUpdate(newJson)"></pre>
+
+</div>

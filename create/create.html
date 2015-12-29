@@ -1,0 +1,12 @@
+<div class="create">
+  <h2>Create User</h2>
+
+  <button class="btn-md btn-primary" ng-click="go('/')">Home</button>
+
+  <h3>Connection</h3>
+  <select id="connectionsList" ng-options="connection.name for connection in connections" ng-model="selectedConnection"></select>
+
+  <h3>User Profile to Create:</h3>
+  <pre id="create-user" pretty-json="user" edition="true" on-edit="doCreate(newJson)"></pre>
+
+</div>

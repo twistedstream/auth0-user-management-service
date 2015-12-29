@@ -1,6 +1,5 @@
 body{
   font-family: "proxima-nova",sans-serif;
-  text-align: center;
   font-size: 300%;
   font-weight: 100;
 }
@@ -100,4 +99,9 @@ label.ng-binding{
   text-align: left;
   padding-left: 10%;
   margin-bottom: 20px;
+}
+
+td{
+  text-align: left;
+  font-size: 14pt;
 }

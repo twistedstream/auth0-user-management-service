@@ -5,23 +5,6 @@ angular.module( 'sample.home', [
 
   $scope.auth = auth;
 
-  $scope.callApi = function () {
-    // Just call the API as you'd do using $http
-    $http({
-      url: AUTH0_USER_MANAGEMENT_URL + '/users',
-      method: 'GET'
-    }).then(function (users) {
-      alert(JSON.stringify(users));
-    }, function (response) {
-      if (response.status === 0) {
-        alert("Please download the API seed so that you can call it.");
-      }
-      else {
-        alert(response.data);
-      }
-    });
-  };
-
   $scope.logout = function() {
     auth.signout();
     store.remove('profile');
@@ -29,4 +12,25 @@ angular.module( 'sample.home', [
     $location.path('/login');
   };
 
+  $scope.deleteUser = function (user) {
+    if(confirm('Are you sure you want to delete user "' + user.email + '"?')) {
+      $http({
+        url: AUTH0_USER_MANAGEMENT_URL + '/users/' + user.user_id,
+        method: 'DELETE'
+      }).then(function (response) {
+        return $scope.refreshUsers();
+      }, $scope.onFail);
+    }
+  };
+
+  $scope.refreshUsers = function () {
+    return $http({
+      url: AUTH0_USER_MANAGEMENT_URL + '/users',
+      method: 'GET'
+    }).then(function (response) {
+      $scope.users = response.data;
+    }, $scope.onFail);
+  };
+
+  return $scope.refreshUsers();
 });
