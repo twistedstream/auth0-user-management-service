@@ -18,9 +18,20 @@ app.use(function getAuth0Config (req, res, done) {
     client_id: secrets.client_id,
     client_secret: secrets.client_secret,
     domain: secrets.domain,
-    admin_authz: secrets.admin_authz,
+    admin_authz: null,
     api_access_token: secrets.api_access_token
   };
+
+  if (secrets.admin_authz) {
+    // attempt to parse admin_authz into a function
+    try {
+      req.auth0.admin_authz = genfun()
+        (secrets.admin_authz)
+        .toFunction();
+    } catch (e) {
+      return done(new Error('admin_authz secret could not be parsed into a JavaScript function: ' + e));
+    }
+  }
 
   // assert that all values were populated
   var missingKeys = Object.keys(req.auth0).reduce(function (previous, key) {
@@ -51,11 +62,8 @@ app.use(function authorize (req, res, done) {
   if (req.user.aud !== req.auth0.client_id)
     return res.status(401).send('Incorrect audience');
 
-  var authorizer = genfun()
-    (req.auth0.admin_authz)
-    .toFunction();
-
-  if (!authorizer(req.user))
+  // admin for all users
+  if (req.auth0.admin_authz.length === 1 && !req.auth0.admin_authz(req.user))
     return res.status(401).send('User unauthorized');
 
   done();
