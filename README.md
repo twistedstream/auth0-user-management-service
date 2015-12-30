@@ -29,22 +29,21 @@ Then to provision your service, use the following [Webtask CLI](https://webtask.
 ```bash
 wt create -n user_management \
   --no-parse --no-merge \
-  -p "WEBTASK_PROFILE" \
-  -s client_id="CLIENT_ID" \
-  -s client_secret="CLIENT_SECRET" \
-  -s domain="DOMAIN" \
-  -s admin_authz="ADMIN_AUTHZ" \
-  -s api_access_token="API_ACCESS_TOKEN"
+  -p "your-webtask-profile" \
+  -s client_id="your-admin-app-client-id" \
+  -s client_secret="your-admin-app-client-secret" \
+  -s domain="your-account.auth0.com" \
+  -s admin_authz="function (claims) { return claims.admin === true; }" \
+  -s api_access_token="your-auth0-management-api-access-token"
   https://raw.githubusercontent.com/twistedstream/auth0-user-management-service/master/webtask.js
 ```
 
 where:
-* `WEBTASK_PROFILE`: the name of the profile you set up when setting up your Webtask account
-* `CLIENT_ID`/`CLIENT_SECRET`: The Client ID and Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
-* `DOMAIN`: your Auth0 account domain
-* `ADMIN_AUTHZ`: A JavaScript function that operates on the JWT's claims and determines if the identity is authorized to manage users in the Auth0 account.  
-Example: `"function (claims) { return claims.admin === true; }"`
-* `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to manage your Account users. Obtain one by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating a token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
+* `-p`: the name of the profile you set up when setting up your Webtask account
+* `client_id`/`client_secret`: The Client ID and Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
+* `domain`: your Auth0 account domain
+* `admin_authz`: A JavaScript function that operates on the JWT's claims and determines if the identity is authorized to manage users in the Auth0 account.
+* `api_access_token`: an Auth0 Management API **access token** that will give your service the required access to manage your Account users. Obtain one by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating a token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
 
 > NOTE: We don't need to worry about configuring the service with CORS as the Webtask infrastructure automatically responds with CORS headers that allow all origins. This is secure because we don't allow access to the service without a valid JWT Bearer token.
 
