@@ -11,8 +11,7 @@ var app = Express();
 app.use(bodyParser.json());
 
 app.use(function getAuth0Config (req, res, done) {
-  //TODO: switch to req.webtaskContext.secrets when available
-  var secrets = req.webtaskContext.data;
+  var secrets = req.webtaskContext.secrets;
 
   // load auth0 config object with secret values
   req.auth0 = {
