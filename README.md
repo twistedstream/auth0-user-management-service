@@ -12,7 +12,7 @@ However, there are a few scenarios where having your own backend is handy. A com
 
 * Quickly set up a REST API service that can be used by a frontend app in your Auth0 account to manage your users without having to build your own from scratch
 * Provision and deploy your own instance of this service in a snap, since its a [Webtask](https://webtask.io)
-* Authenticate and authorize "admin" users with a [JWT](http://jwt.io) that contains the claims you specify
+* Authenticate and authorize "admin" users with a [JWT](http://jwt.io) that contains the claim data you require
 * Endpoints exposed by the service simply reverse-proxy calls to associated Users resource endpoints in the Auth0 Management API, which provides maximum flexibility and future-proofing
 * Your service instance gains the necessary access to the Auth0 Management API with an API access token that you configure
 
@@ -33,7 +33,7 @@ wt create -n user_management \
   -s client_id="CLIENT_ID" \
   -s client_secret="CLIENT_SECRET" \
   -s domain="DOMAIN" \
-  -s authz_claims="AUTHZ_CLAIMS" \
+  -s admin_authz="ADMIN_AUTHZ" \
   -s api_access_token="API_ACCESS_TOKEN"
   https://raw.githubusercontent.com/twistedstream/auth0-user-management-service/master/webtask.js
 ```
@@ -42,7 +42,8 @@ where:
 * `WEBTASK_PROFILE`: the name of the profile you set up when setting up your Webtask account
 * `CLIENT_ID`/`CLIENT_SECRET`: The Client ID and Secret of the Auth0 app that will be calling this service, which means its also the app that will be using Auth0 to authenticate the "admin" user.
 * `DOMAIN`: your Auth0 account domain
-* `AUTHZ_CLAIMS`: a JSON object that represents the claim state that must exist within the identity's JWT payload for it to be considered authorized to make the request. Example: `{"admin": true}`
+* `ADMIN_AUTHZ`: A JavaScript function that operates on the JWT's claims and determines if the identity is authorized to manage users in the Auth0 account.  
+Example: `"function (claims) { return claims.admin === true; }"`
 * `API_ACCESS_TOKEN`: an Auth0 Management API **access token** that will give your service the required access to manage your Account users. Obtain one by visiting the [API Explorer](https://auth0.com/docs/api/v2) and generating a token with the following scopes: `read:users`, `create:users`, `delete:users`, `update:users`, `update:users_app_metadata`
 
 > NOTE: We don't need to worry about configuring the service with CORS as the Webtask infrastructure automatically responds with CORS headers that allow all origins. This is secure because we don't allow access to the service without a valid JWT Bearer token.
@@ -79,7 +80,7 @@ where `ADMIN_USER_JWT` is the `id_token` obtained when the admin user logged int
 
 ## How it works
 
-Once up and running, your service instance will expose a set of endpoints that will allow an authorized user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_claims` value, which is compared against the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint, which it can access using the configured `api_access_token`.
+Once up and running, your service instance will expose a set of endpoints that will allow an authorized user to manage users in your Auth0 account. These endpoints essentially reverse-proxy to equivalent endpoints of the [Users resource](https://auth0.com/docs/api/v2#!/Users/get_users) in the Auth0 Management API. The difference is that your service *authenticates* each request by expecting a JWT passed as a [bearer token](https://tools.ietf.org/html/draft-ietf-oauth-v2-bearer-20#section-2.1) that has been signed with the same Client Secret for which the service has been configured. It also *authorizes* the request using the configured `authz_expression`, which is evaluated against the JWT payload for expected claim state. Once the request has been authenticated and authorized, the service then proxies the call to the corresponding Auth0 API Users endpoint, which it can access using the configured `api_access_token`.
 
 ## What is Auth0?
 

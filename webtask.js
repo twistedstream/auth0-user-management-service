@@ -4,6 +4,7 @@ var Webtask = require('webtask-tools');
 var _ = require('lodash');
 var request = require('request');
 var bodyParser = require('body-parser');
+var genfun = require('generate-function');
 
 var app = Express();
 
@@ -18,7 +19,7 @@ app.use(function getAuth0Config (req, res, done) {
     client_id: secrets.client_id,
     client_secret: secrets.client_secret,
     domain: secrets.domain,
-    authz_claims: secrets.authz_claims,
+    admin_authz: secrets.admin_authz,
     api_access_token: secrets.api_access_token
   };
 
@@ -51,7 +52,10 @@ app.use(function authorize (req, res, done) {
   if (req.user.aud !== req.auth0.client_id)
     return res.status(401).send('Incorrect audience');
 
-  var authorizer = _.matches(JSON.parse(req.auth0.authz_claims));
+  var authorizer = genfun()
+    (req.auth0.admin_authz)
+    .toFunction();
+
   if (!authorizer(req.user))
     return res.status(401).send('User unauthorized');
 
